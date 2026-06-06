@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .admin-login-box { max-width: 400px; margin: 150px auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        .admin-container { padding: 50px; max-width: 1200px; margin: 100px auto 0 auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 18px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #1a252f; color: white; font-weight: 600; }
+        tr:hover { background-color: #f9f9f9; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <nav class="navbar">
+        <div class="logo">Grand Hotel - Admin Panel</div>
+        <ul class="nav-links">
+            <li><a href="/">Դեպի Կայք</a></li>
+        </ul>
+    </nav>
+
+    {% if not authenticated %}
+    <div class="admin-login-box">
+        <h2 style="margin-bottom: 20px; color: #2c3e50;">Մուտք Admin Պանել</h2>
+        
+        {% with messages = get_flashed_messages(category_filter=["admin_error"]) %}
+          {% if messages %}
+            {% for message in messages %}
+              <div style="color: #e74c3c; margin-bottom: 15px; font-weight: bold;">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label>Մուտքագրեք Գաղտնաբառը</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn-block" style="background: #2c3e50;">Մուտք Գործել</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="admin-container">
+        <h2 style="color: #2c3e50; margin-bottom: 20px;">Ստացված Ամրագրումներ</h2>
+       <table>
+    <thead>
+        <tr>
+            <th>Հաճախորդ</th>
+            <th>Սենյակ</th>
+            <th>Ժամանում / Մեկնում</th>
+            <th>Գիշերներ</th>
+            <th>Ընդհանուր Գումար</th>
+            <th>Գործողություն</th> </tr>
+    </thead>
+    <tbody>
+        {% for booking in bookings %}
+        <tr>
+            <td><strong>{{ booking.name }}</strong></td>
+            <td><span style="background: #e8f8f5; color: #2ec4b6; padding: 5px 10px; border-radius: 4px; font-weight: bold;">{{ booking.room }}</span></td>
+            <td>{{ booking.checkin }} ից մինչև {{ booking.checkout }}</td>
+            <td>{{ booking.nights }} գիշեր</td>
+            <td style="color: #27ae60; font-weight: bold;">{{ booking.total }}</td>
+            <td>
+                <form action="/delete-booking/{{ loop.index0 }}" method="POST" style="display:inline;" onsubmit="return confirm('Վստա՞հ եք, որ ցանկանում եք ջնջել այս ամրագրումը:');">
+                    <button type="submit" style="background-color: #e74c3c; color: white; border: none; padding: 6px 12px; cursor: pointer; font-weight: bold; font-size: 13px;">Ջնջել</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+    {% endif %}
+
+</body>
+</html>

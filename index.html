@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Hotel Demo</title>
+    <link rel="icon" href="https://fav.farm/🏨" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">Grand Hotel</div>
+        <ul class="nav-links">
+            <li><a href="#hero">Գլխավոր</a></li>
+            <li><a href="#rooms">Սենյակներ</a></li>
+            <li><a href="#amenities">Հարմարություններ</a></li>
+            <li><a href="#booking">Ամրագրում</a></li>
+            <li><a href="/admin" target="_blank" style="color: #f1c40f; font-weight: bold;">Admin Պանել</a></li>
+        </ul>
+    </nav>
+
+    <header id="hero" class="hero-section">
+        <div class="hero-content">
+            <h1>Բարի գալուստ Grand Hotel</h1>
+            <p>Վայելեք Ձեր կատարյալ հանգիստը մեզ մոտ</p>
+            <a href="#booking" class="btn">Ամրագրել Հիմա</a>
+        </div>
+    </header>
+
+    <section id="rooms" class="section">
+        <h2 class="section-title">Մեր Սենյակները</h2>
+        <div class="filter-buttons" style="margin-bottom: 30px;">
+    <button onclick="filterRooms('all')" class="btn-sm" style="display:inline-block; margin: 5px;">Բոլորը</button>
+    <button onclick="filterRooms('Deluxe')" class="btn-sm" style="display:inline-block; margin: 5px;">Deluxe</button>
+    <button onclick="filterRooms('Լյուքս')" class="btn-sm" style="display:inline-block; margin: 5px;">Լյուքս</button>
+</div>
+        <div class="grid-container">
+            {% for room in rooms %}
+            <div class="card room-card">
+               <img src="{{ url_for('static', filename=room.image) }}" alt="{{ room.name }}" class="room-img">
+                <div class="room-info">
+                    <h3>{{ room.name }}</h3>
+                    <p class="price">{{ room.price }}</p>
+                    <p>{{ room.features }}</p>
+                    <a href="#booking" class="btn-sm">Ամրագրել</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="amenities" class="section bg-light">
+        <h2 class="section-title">Հարմարություններ</h2>
+        <div class="grid-container">
+            {% for amenity in amenities %}
+            <div class="card amenity-card">
+                <span class="icon">{{ amenity.icon }}</span>
+                <h3>{{ amenity.title }}</h3>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="booking" class="section">
+        <h2 class="section-title">Օնլայն Ամրագրում</h2>
+        <div class="form-container">
+            
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert success">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form action="/book" method="POST">
+                <div class="form-group">
+                    <label>Անուն Ազգանուն</label>
+                    <input type="text" name="name" required placeholder="Պողոս Պողոսյան">
+                </div>
+                <div class="form-group">
+                    <label>Ընտրել Սենյակը</label>
+                    <select name="room" required>
+                        {% for room in rooms %}
+                        <option value="{{ room.name }}">{{ room.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ժամանման օր</label>
+                    <input type="date" name="checkin" id="checkin" required>
+                </div>
+                <div class="form-group">
+                    <label>Մեկնման օր</label>
+                    <input type="date" name="checkout" id="checkout" required>
+                </div>
+                <button type="submit" class="btn-block">Հաստատել Ամրագրումը</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="contact" class="section bg-dark">
+        <h2 class="section-title">Հետադարձ Կապ</h2>
+        <div class="contact-info">
+            <p>📍 Հասցե: Թումանյան 1, Երևան</p>
+            <p>📞 Հեռախոս: +374 96 78-78-55</p>
+        </div>
+    </section>
+
+    <script>
+        // Վերցնում ենք այսօրվա ամսաթիվը YYYY-MM-DD ֆորմատով
+        const today = new Date().toISOString().split('T')[0];
+        
+        const checkinInput = document.getElementById('checkin');
+        const checkoutInput = document.getElementById('checkout');
+        
+        // Թույլ չտալ ընտրել այսօրվանից հետ ընկած օրեր
+        checkinInput.min = today;
+        checkoutInput.min = today;
+
+        // Երբ օգտատերը ընտրում է ժամանման օրը, մեկնման օրվա մինիմումը դառնում է դրանից 1 օր ուշ
+        checkinInput.addEventListener('change', function() {
+            if (this.value) {
+                let nextDay = new Date(this.value);
+                nextDay.setDate(nextDay.getDate() + 1);
+                checkoutInput.min = nextDay.toISOString().split('T')[0];
+            }
+        });
+
+        function filterRooms(category) {
+    const cards = document.querySelectorAll('.room-card');
+    cards.forEach(card => {
+        const title = card.querySelector('h3').innerText;
+        if (category === 'all' || title.includes(category)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+    </script>
+
+</body>
+</html>
